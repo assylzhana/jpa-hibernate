@@ -1,7 +1,9 @@
 package com.bitlab.thymeleaflayoutdialect.controller;
 
-import com.bitlab.thymeleaflayoutdialect.db.DBManager;
-import com.bitlab.thymeleaflayoutdialect.models.Task;
+import com.bitlab.thymeleaflayoutdialect.config.DBUtil;
+import com.bitlab.thymeleaflayoutdialect.services.ApplicationRequestService;
+import com.bitlab.thymeleaflayoutdialect.models.ApplicationRequest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,34 +14,41 @@ import java.util.List;
 
 @Controller
 public class HomeController {
+
+
+    @Autowired
+    private ApplicationRequestService applicationRequestService;
+
+    @Autowired
+    private DBUtil dbUtil;
+
     @GetMapping("/")
     public String homePage(Model model){
-        List<Task> task =  DBManager.getTasks();
+        List<ApplicationRequest> task =  applicationRequestService.getTasks();
         model.addAttribute("task",task);
-        return "home";
+        return "ex";
     }
 
-    @PostMapping("/add-task")
-    public String addPage(Task task){
-        task.setCompleted(false);
-        DBManager.addNewTask(task);
+    @PostMapping("/add-request")
+    public String addPage(ApplicationRequest task){
+        task.setHandled(false);
+        applicationRequestService.addNewTask(task);
         return "redirect:/";
     }
     @GetMapping("/details/{id}")
     public String detailsPage(@PathVariable Long id,Model model){
-        Task task = DBManager.getTaskById(id);
+        ApplicationRequest task = applicationRequestService.getTaskById(id);
         model.addAttribute("task",task);
         return "details";
     }
     @PostMapping("/delete-task/{id}")
     public String deletePage(@PathVariable Long id){
-        DBManager.deleteTask(id);
+        applicationRequestService.deleteTask(id);
         return "redirect:/";
     }
     @PostMapping("/done/{id}")
     public String makeDone(@PathVariable Long id){
-        Task task = DBManager.getTaskById(id);
-        task.setCompleted(true);
+        applicationRequestService.markTaskAsHandled(id);
         return "redirect:/";
     }
 }
